@@ -106,7 +106,7 @@ export async function getLinkAnalytics(urlId: number, days = 30): Promise<LinkAn
     .select({
       totalVisits: sql<number>`SUM(CASE WHEN ${visits.isBot} = 0 THEN 1 ELSE 0 END)`.mapWith(Number),
       botVisits: sql<number>`SUM(CASE WHEN ${visits.isBot} = 1 THEN 1 ELSE 0 END)`.mapWith(Number),
-      uniqueVisitors: countDistinct(visits.visitorAgent),
+      uniqueVisitors: sql<number>`COUNT(DISTINCT CASE WHEN ${visits.isBot} = 0 THEN ${visits.visitorIp} END)`.mapWith(Number),
       visitsToday: sql<number>`SUM(CASE WHEN ${visits.isBot} = 0 AND ${visits.visitedAt} >= ${todayStart} THEN 1 ELSE 0 END)`.mapWith(
         Number,
       ),
