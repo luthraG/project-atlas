@@ -67,7 +67,7 @@ export function evaluateAvailability(link: Link | undefined | null): LinkAvailab
   if (link.deletedAt) return 'deleted';
   if (link.blacklisted === 1) return 'blocked';
   if (link.expiredStatus === 1) return 'expired';
-  if (link.expiresAt && link.expiresAt.getTime() >= Date.now()) return 'expired';
+  if (link.expiresAt && link.expiresAt.getTime() <= Date.now()) return 'expired';
   return 'active';
 }
 
