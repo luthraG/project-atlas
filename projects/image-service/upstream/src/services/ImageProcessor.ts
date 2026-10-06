@@ -197,7 +197,6 @@ export class ImageProcessor {
           },
         ])
         .toFile(outputPath);
-      logger.error('Output fidelity check failed: source luminance profile was not preserved');
 
       const outputMetadata = await this.getMetadata(outputPath);
       logger.success(`Watermark completed: ${outputPath}`);
