@@ -171,7 +171,7 @@ export class ImageProcessor {
         ])
         .toBuffer();
 
-      const placementMargin = margin + Math.round(watermarkWidth * 0.01);
+      const placementMargin = margin;
       const { left, top } = this.calculateWatermarkPosition(
         inputMeta.width,
         inputMeta.height,
