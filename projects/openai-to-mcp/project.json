@@ -7,7 +7,9 @@
   "language": "TypeScript",
   "runtime": "Requires Node.js 18 or newer; tested with Node.js 24.12.0 and npm 11.6.2",
   "setup_command": "npm install",
-  "baseline_test_command": "npm run build && npm test",
+  "baseline_test_command": "npm test",
   "start_command": "npm run build && npm start",
-  "log_file": "~/.openapi-mcp/logs/app-YYYY-MM-DD.log"
+  "log_file": "~/.openapi-mcp/logs/app-YYYY-MM-DD.log",
+  "demo_command": "cd ../demo && ./run.sh",
+  "demo_log_file": "../demo/logs/openai-to-mcp.log"
 }

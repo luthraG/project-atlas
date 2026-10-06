@@ -5,24 +5,23 @@ import * as fs from 'fs';
 import { homedir } from 'os';
 
 // Ensure logs directory exists
-const logDir = path.join(homedir(), '.openapi-mcp', 'logs');
+const logDir = process.env.OPENAPI_MCP_LOG_DIR || path.join(homedir(), '.openapi-mcp', 'logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
-// Define log format
+// Define log format: one JSON object per line
 const logFormat = winston.format.combine(
+  winston.format.timestamp(),
   winston.format.errors({ stack: true }),
-  winston.format.metadata(),
-  winston.format.json({ space: 2 }),
-  winston.format.prettyPrint()
+  winston.format.json()
 );
 
 // Create rotating file transport
 const fileRotateTransport = new winston.transports.DailyRotateFile({
   filename: path.join(logDir, 'app-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
-  maxSize: '5k', // 5KB max size per file
+  maxSize: '20m', // 20MB max size per file
   maxFiles: 10, // Keep 10 files
   format: logFormat,
 });

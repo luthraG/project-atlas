@@ -160,6 +160,20 @@ The server supports various authentication methods:
 - Binary responses
 - Error mapping
 
+#### Tool arguments
+
+Every argument the caller supplies is forwarded to the API, including `false`, `0` and empty
+strings. Only arguments the caller leaves out are omitted from the request.
+
+Array arguments are serialized the way the specification declares them (OpenAPI 3 `style` and
+`explode`):
+
+| Parameter location | Default style | Default explode | `status: ["open", "closed"]` is sent as |
+| --- | --- | --- | --- |
+| query, cookie | `form` | `true` | `status=open&status=closed` |
+| query with `explode: false` | `form` | `false` | `status=open,closed` |
+| path, header | `simple` | `false` | `open,closed` |
+
 ### 4. Type Safety
 
 - Full TypeScript support

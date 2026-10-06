@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Helpdesk API
+  version: 1.4.0
+  description: Support tickets for the Atlas customer desk.
+components:
+  securitySchemes:
+    desk:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /oauth/token
+          scopes:
+            tickets: Read and update tickets
+security:
+  - desk: [tickets]
+paths:
+  /tickets:
+    get:
+      operationId: listTickets
+      description: List tickets, newest first. Filter by one or more statuses and choose the fields returned.
+      parameters:
+        - name: status
+          in: query
+          description: Only tickets in any of these statuses
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [open, pending, closed]
+        - name: fields
+          in: query
+          description: Fields to return for each ticket, as one comma-separated list
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [id, subject, status, priority, assignee, updatedAt]
+        - name: limit
+          in: query
+          description: Maximum number of tickets to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Tickets
+  /tickets/{ticketId}:
+    get:
+      operationId: getTicket
+      description: Read one ticket
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The ticket
+  /tickets/{ticketId}/close:
+    post:
+      operationId: closeTicket
+      description: Close a ticket. The caller decides whether the customer is emailed about it.
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: notifyCustomer
+          in: query
+          required: true
+          description: Email the customer that the ticket was closed
+          schema:
+            type: boolean
+        - name: resolution
+          in: query
+          description: Why the ticket was closed
+          schema:
+            type: string
+            enum: [fixed, duplicate, wont_fix]
+      responses:
+        '200':
+          description: The closed ticket

@@ -36,7 +36,9 @@ export async function getOpenApiClient(specUrl: string, baseURL: string, headers
         
         openApi.axiosConfigDefaults = {
             baseURL,
-            headers: mergedHeaders
+            headers: mergedHeaders,
+            // Arrays go out as repeated keys (status=open&status=closed), not axios's status[]=open
+            paramsSerializer: { indexes: null }
         };
         
         // If using certificate auth, add the HTTPS agent
@@ -54,6 +56,18 @@ export async function getOpenApiClient(specUrl: string, baseURL: string, headers
         });
         
         const client = await openApi.init();
+
+        // OAuth tokens expire: refresh the Authorization header before each request
+        if (authConfig.type === AuthType.OAUTH2) {
+            client.interceptors.request.use(async (config) => {
+                const fresh = await getAuthHeaders(authConfig, authState);
+                if (fresh.Authorization) {
+                    config.headers.set('Authorization', fresh.Authorization);
+                }
+                return config;
+            });
+        }
+
         logger.debug('Returning OpenAPI client instance');
         return client;
     } catch (error) {

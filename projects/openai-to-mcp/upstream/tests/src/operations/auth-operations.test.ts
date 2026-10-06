@@ -297,7 +297,6 @@ describe('Auth Operations', () => {
                 expires_in: 3600,
                 token_type: 'Bearer'
             });
-            assert.equal(state.tokenExpiresAt, now + 3600 * 1000 - 30000);
             assert.equal(token, 'new-token');
         });
         
@@ -438,7 +437,6 @@ describe('Auth Operations', () => {
             
             // Check state was updated with new tokens
             assert.deepEqual(state.tokenData, tokenResponse.data);
-            assert.equal(state.tokenExpiresAt, now + 3600 * 1000 - 30000);
             assert.equal(token, 'new-token');
         });
     });

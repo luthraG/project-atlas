@@ -46,9 +46,10 @@ async function onToolCall(args: Record<string, any>, entry: OperationEntry): Pro
     catch (error: any) {
         if (error?.response) {
             const axiosError = error as AxiosError;
-            logger.warn(`API error in operation ${operationId}`, { 
+            logger.error(`API error in operation ${operationId}`, { 
                 status: axiosError?.response?.status, 
-                message: axiosError.message 
+                error: axiosError.message,
+                detail: (axiosError.response?.data as any)?.message
             });
             
             return {

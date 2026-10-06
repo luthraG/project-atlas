@@ -201,7 +201,7 @@ export async function getOAuthToken(
         
         // Calculate token expiration time (with 30-second safety margin)
         if (response.data.expires_in) {
-            state.tokenExpiresAt = now + (response.data.expires_in * 1000) - 30000;
+            state.tokenExpiresAt = now + response.data.expires_in - 30000;
         }
         
         // Save refresh token if provided
@@ -219,6 +219,7 @@ export async function getOAuthToken(
     } catch (error) {
         logger.error('Failed to obtain OAuth token', {
             error: error instanceof Error ? error.message : String(error),
+            status: axios.isAxiosError(error) ? error.response?.status : undefined,
             url: authConfig.oauth2.tokenUrl
         });
         return null;

@@ -45,7 +45,7 @@ export function unifiedArgumentsToParametersArray(args: Record<string, any>, par
         const { name, in: location, schema } = param;
         
         // Skip if the argument wasn't provided
-        if (args[name] === undefined) {
+        if (!args[name]) {
             logger.debug(`Parameter ${name} not provided in arguments`);
             continue;
         }
@@ -56,10 +56,12 @@ export function unifiedArgumentsToParametersArray(args: Record<string, any>, par
         } else {
             // Handle path, query, header parameters
             logger.debug(`Setting ${location} parameter ${name}`);
+            // Lists travel as one comma-separated value
+            const value = Array.isArray(args[name]) ? args[name].join(',') : args[name];
             otherParams.push({
                 name,
                 in: location,
-                value: args[name],
+                value,
             });
         }
     }

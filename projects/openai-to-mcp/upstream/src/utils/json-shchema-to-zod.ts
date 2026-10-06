@@ -35,7 +35,11 @@ export function openAPISchemaToZod(schemaObject: OpenAPIV3.SchemaObject): z.ZodT
             return z.object(shape).describe(schemaDescription);
         }
         case "array": {
-            // Assuming arrays contain objects with properties.
+            const items = (schemaObject as OpenAPIV3.ArraySchemaObject).items as OpenAPIV3.SchemaObject | undefined;
+            if (items?.type) {
+                return z.array(openAPISchemaToZod(items)).describe(schemaDescription);
+            }
+            // Without typed items, assume arrays contain objects with properties.
             const shape = convertPropertiesToZodShape((properties ?? {}) as Record<string, OpenAPIV3.SchemaObject>, required);
             return z.array(z.object(shape)).describe(schemaDescription);
         }
