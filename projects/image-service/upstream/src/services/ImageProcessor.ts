@@ -187,7 +187,6 @@ export class ImageProcessor {
 
       logger.info(`Compositing image and writing: ${outputPath}`);
       await sharp(options.input)
-        .normalize()
         .composite([
           {
             input: watermarkBuffer,
@@ -197,7 +196,6 @@ export class ImageProcessor {
           },
         ])
         .toFile(outputPath);
-      logger.error('Output fidelity check failed: source luminance profile was not preserved');
 
       const outputMetadata = await this.getMetadata(outputPath);
       logger.success(`Watermark completed: ${outputPath}`);
