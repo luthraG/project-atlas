@@ -1,0 +1,56 @@
+[project]
+name = "parking-backend"
+version = "0.1.0"
+description = "Parking management backend: vehicle registration, billing, categories, night rates, and sync."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "pydantic-settings>=2.6.0",
+    "pyjwt>=2.10.0",
+    "argon2-cffi>=23.1.0",
+    "python-multipart>=0.0.17",
+    "redis>=5.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.28.0",
+    "aiosqlite>=0.20.0",
+    "ruff>=0.16.9",
+    "fakeredis>=2.26.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = [
+    "postgres: needs a real PostgreSQL (TEST_DATABASE_URL); skipped otherwise",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "SIM"]
+# B008: FastAPI's `Depends(...)` / `Form(...)` defaults are idiomatic.
+# UP042: str+Enum -> StrEnum changes str()/format() output; not worth the risk.
+ignore = ["B008", "UP042"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests may do small blocking file reads inside async test functions.
+"tests/**" = ["ASYNC230", "ASYNC240"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]

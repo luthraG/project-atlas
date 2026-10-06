@@ -1,0 +1,16 @@
+{
+  "id": "parking-lot",
+  "name": "Parking Lot API",
+  "repository": "https://github.com/paulmrg-461/parking_management",
+  "revision": "f6f82cd98a84c5b15346e80c482436921eec8786",
+  "path_in_repository": "backend",
+  "license": "MIT",
+  "language": "Python",
+  "runtime": "Requires Python 3.12; tested with Python 3.12.13",
+  "setup_command": "pip install -r requirements.txt",
+  "baseline_test_command": "pytest",
+  "start_command": "uvicorn app.main:app",
+  "log_file": "stdout, or LOG_FILE with LOG_FORMAT=json",
+  "demo_command": "cd ../demo && ./run.sh",
+  "demo_log_file": "../demo/logs/parking-lot.log"
+}
