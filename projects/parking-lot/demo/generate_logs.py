@@ -2,7 +2,9 @@
 
 The app runs in-process on a throwaway SQLite database with a simulated clock, so a day
 of check-ins, check-outs, list refreshes and reports takes seconds. Log timestamps follow
-the simulated clock. Output: ./logs/parking-lot.log (a previous log moves to ./logs/archive/).
+the simulated clock. The log starts at 04:00 with the cars parked overnight already in the
+lot and ends shortly after midnight. Output: ./logs/parking-lot.log (a previous log moves
+to ./logs/archive/).
 
     python generate_logs.py [--day 2026-10-05] [--seed 7]
 
@@ -52,8 +54,12 @@ from sqlalchemy import event  # noqa: E402
 
 import app.infrastructure.models  # noqa: E402,F401  (registers the tables)
 from app.core.security import hash_password  # noqa: E402
+from app.domain.parking_session import ParkingSession  # noqa: E402
 from app.domain.user import User, UserRole  # noqa: E402
 from app.infrastructure.database import Base, async_session_factory, engine  # noqa: E402
+from app.infrastructure.repositories.parking_session_repository import (  # noqa: E402
+    SqlAlchemyParkingSessionRepository,
+)
 from app.infrastructure.repositories.user_repository import SqlAlchemyUserRepository  # noqa: E402
 from app.main import app  # noqa: E402
 from app.presentation.deps import get_clock  # noqa: E402
@@ -70,7 +76,7 @@ class SimClock:
         self.now += timedelta(**delta)
 
 
-clock = SimClock(datetime.combine(DAY - timedelta(days=1), time(17, 0), tzinfo=ZONE).astimezone(UTC))
+clock = SimClock(datetime.combine(DAY, time(4, 0), tzinfo=ZONE).astimezone(UTC))
 app.dependency_overrides[get_clock] = lambda: clock
 _factory = logging.getLogRecordFactory()
 
@@ -154,6 +160,18 @@ async def main() -> None:
             parked: dict[str, tuple[int, datetime]] = {}   # plate -> (session id, planned exit)
             failed: dict[int, int] = {}                    # session id -> failed check-out attempts
             passes_done = False
+
+            # Cars parked since last evening, checked in before this log starts.
+            overnight = [p for p in plates if category_of[p] == "Car"][:11]
+            for plate in overnight:
+                vehicle = (await call("POST", "/api/vehicles", admin,
+                                      json={"plate": plate, "category_id": categories["Car"]})).json()
+                async with async_session_factory() as session:
+                    entered = local(DAY - timedelta(days=1), rng.uniform(17, 21.5))
+                    created = await SqlAlchemyParkingSessionRepository(session).create(
+                        ParkingSession(id=None, vehicle_id=vehicle["id"], operator_id=2, entry_time=entered))
+                    await session.commit()
+                parked[plate] = (created.id, local(DAY, rng.uniform(6.5, 9.5)))
             end = local(DAY + timedelta(days=1), 0.5)
             next_poll = [clock.now + timedelta(minutes=10), clock.now + timedelta(minutes=25)]
             next_report = local(DAY, 8)
@@ -165,6 +183,8 @@ async def main() -> None:
             while clock.now < end:
                 hour = clock.now.astimezone(ZONE).hour
                 clock.advance(minutes=rng.expovariate(arrivals_per_hour(hour) / 60))
+                if clock.now >= end:
+                    break
                 operator = rng.choice(operators)
 
                 # Arrivals
