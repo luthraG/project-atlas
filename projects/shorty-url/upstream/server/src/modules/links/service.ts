@@ -233,7 +233,7 @@ export async function recordClick(link: Link, client: ClientDetails): Promise<vo
     }),
   ];
 
-  if (!client.isBot && client.browser !== null) {
+  if (!client.isBot) {
     tasks.push(
       db
         .update(links)
@@ -243,13 +243,6 @@ export async function recordClick(link: Link, client: ClientDetails): Promise<vo
   }
 
   const results = await Promise.allSettled(tasks);
-
-  if (!client.isBot && client.browser === null) {
-    logger.error(
-      { linkId: link.id, device: client.device, userAgent: client.userAgent },
-      'click classification produced an incomplete counter update',
-    );
-  }
 
   for (const result of results) {
     if (result.status === 'rejected') {
