@@ -44,8 +44,8 @@ export function unifiedArgumentsToParametersArray(args: Record<string, any>, par
     for (const param of params) {
         const { name, in: location, schema } = param;
         
-        // Skip if the argument wasn't provided
-        if (!args[name]) {
+        // Skip if the argument wasn't provided (false, 0 and '' are real values)
+        if (args[name] === undefined || args[name] === null) {
             logger.debug(`Parameter ${name} not provided in arguments`);
             continue;
         }
