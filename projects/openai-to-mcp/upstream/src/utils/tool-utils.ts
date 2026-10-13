@@ -56,8 +56,10 @@ export function unifiedArgumentsToParametersArray(args: Record<string, any>, par
         } else {
             // Handle path, query, header parameters
             logger.debug(`Setting ${location} parameter ${name}`);
-            // Lists travel as one comma-separated value
-            const value = Array.isArray(args[name]) ? args[name].join(',') : args[name];
+            // Query arrays default to OpenAPI form style with explode=true (separate values);
+            // only explode: false query params and non-query locations travel as one comma-separated value
+            const joinList = location !== 'query' || param.explode === false;
+            const value = Array.isArray(args[name]) && joinList ? args[name].join(',') : args[name];
             otherParams.push({
                 name,
                 in: location,
